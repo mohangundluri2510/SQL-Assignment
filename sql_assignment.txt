@@ -1,0 +1,107 @@
+CREATE SCHEMA `Sqlassignment`;
+USE `Sqlassignment`;
+
+
+
+CREATE TABLE IF NOT EXISTS employees (
+	empid integer(4) not null unique,
+	emp_name varchar(30),
+	Gender varchar(10),
+	department varchar(30),
+	check(Gender in ("Male","Female")));
+
+
+
+Insert into employees values(1,'X','Female','Finance'),(2,'Y','Male','IT'),(3,'Z','Male','HR'),(4,'W','Female','IT');
+Insert into employees values(6,'U','gm','IT');
+Insert into employees values(5,'X','Female',null);
+
+
+
+Question -1:
+SELECT IFNULL(Department,'Not Assigned') as Department,
+    COUNT(CASE WHEN UPPER(Gender)='MALE' THEN 1 END) AS 'Num of Male',
+    COUNT(CASE WHEN UPPER(Gender)='FEMALE' THEN 1 END) AS 'Num of Female'
+FROM employees GROUP BY Department;
+
+
+
+CREATE TABLE employeesalaries (
+	emp_name varchar(30) not null,
+	Jan Float(15,2) Not null default 0,
+	Feb Float(15,2) Not null default 0,
+	March Float(15,2) Not null default 0,
+	check(Jan>=0 and Feb >=0 and March >=0));
+
+
+
+INSERT INTO employeesalaries VALUES('X',5200,9093,3832),('Y',9023,8942,4000),('Z',9834,8197,9903),('W',3244,4321,0293);
+INSERT INTO employeesalaries VALUES('V',100,100,null);
+INSERT INTO employeesalaries VALUES('V',100,-100,null);
+
+
+
+Question-2:
+
+SELECT emp_name as Name,
+  value,
+  case when idx=1 then 'Jan'
+       when idx=2 then 'Feb'
+       when idx=3 then 'Mar'
+  end AS Month
+FROM (
+SELECT
+  emp_name,
+  GREATEST(Jan, Feb, March) as value,
+  FIELD(greatest(Jan, Feb, March), Jan, Feb, March) as Kidx
+FROM
+  employeesalaries
+) emps;
+
+
+
+CREATE TABALE test (
+	candidate_id integer(4) not null unique,	
+	marks float(10,2) default 0);
+
+
+INSERT INTO test 
+VALUES (1,98),
+	  (2,78),
+	  (3,87),
+	  (4,98),
+	  (5,78); 
+
+
+
+
+Question-3:
+SELECT Marks,GROUP_CONCAT(Candidate_id) AS Candidate_id, dense_rank() OVER (ORDER BY marks DESC ) AS 'rank'
+FROM test
+GROUP BY marks;
+
+
+
+CREATE TABALE mail_ids (
+candidate_id integer(4) not null,
+mail varchar(30) not null);  
+
+ 
+INSERT INTO mail_ids 
+VALUES (45,'abc@gmail.com'),
+	  (23,'def@yahoo.com'),
+	  (34,'abc@gmail.com'),
+	  (21,'bcf@gmail.com'),
+	  (94,'def@yahoo.com');  
+
+
+
+
+
+Question-4:
+DELETE FROM mail_ids 
+WHERE candidate_id IN (SELECT tempcandidate_id FROM (SELECT DISTINCT a.candidate_id as tempcandidate_id 
+FROM mailids AS a 
+INNER JOIN mail_ids AS b 
+WHERE a.mail=b.mail AND a.candidate_id>b.candidate_id) AS c) 
+ORDER BY candidate_id;
